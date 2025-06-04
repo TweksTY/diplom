@@ -136,10 +136,10 @@ def get_proceeding_metadata(item):
 
 def get_metadata_by_type(work_type, item):
     extractors = {
-        "Book": get_book_metadata,
-        "Article": get_article_metadata,
-        "Dissertation": get_dissertation_metadata,
-        "Proceeding": get_proceeding_metadata,
+        "Книга": get_book_metadata,
+        "Стаття у журналі": get_article_metadata,
+        "Дисертація": get_dissertation_metadata,
+        "Тези конференції": get_proceeding_metadata,
     }
     return extractors[work_type](item)
 
@@ -176,8 +176,6 @@ if submitted and (title_input or last_name):
             works = []
             col1, col2 = st.columns([9,3])
             for idx, crossref_item in enumerate(crossref_items):
-                
-                #st.write(f"Знайдено роботу: {crossref_item.get('title', [''])[0]}")
                 metadata = get_metadata_by_type(work_type, crossref_item)
                 work_obj = work_classes[work_type](metadata)
                 works.append(work_obj)
