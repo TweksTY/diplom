@@ -1,1 +1,14 @@
-node_modules
+node_modules/
+dist/
+__pycache__/
+build/
+venv/
+citations.db
+package-lock.json
+package.json
+OpenSans.ttf
+main.py
+index.spec
+edit_page.py
+citations2.db
+citations1.db
