@@ -15,6 +15,11 @@ class PageGenerator:
             return False, "Введіть дані"
         return True, ""
 
+    def __validate_number_field(self, number):
+        if number is None or number < 1:
+            return False, "Число має бути більшим за 0"
+        return True, ""
+
     def __init__(self, entry = None):
         if 'conn' not in state:
             state['conn'] = db.create_connection("citations.db")
@@ -56,6 +61,9 @@ class PageGenerator:
                         return False, "Сторінка має бути більшою за 0"
                     return True, ""
                 return False, "Цитовані сторінки мають бути в форматі 'X-Y' або одна сторінка 'X'"
+        elif hasattr(self, 'pages_cited') and not self.pages_cited:
+            if st.session_state.get('edit_message', None):
+                return False, "Введіть сторінки, що цитуються"
         return True, ""
 
 
@@ -158,6 +166,11 @@ class PageGenerator:
                 self.db_name = st.text_input("Назва бази даних", value=getattr(self.entry, 'db_name', '') if self.entry else "")
                 self.db_name_placeholder = st.empty()
 
+    def __get_numerical_value(self, attribute, default_value=0):
+        if (st.session_state.get('edit_message', None)):
+            return getattr(self.entry, attribute, default_value) if self.entry else None
+        else:
+            return getattr(self.entry, attribute, default_value) if self.entry and getattr(self.entry, attribute, None) is not None else default_value
 
     def generate_page(self):
 
@@ -208,7 +221,8 @@ class PageGenerator:
 
             self.title = st.text_input("Назва", value = getattr(self.entry, 'title', '') if self.entry else "")
             self.title_placeholder = st.empty()
-            self.text_fields = [(self.title, self.title_placeholder,)]
+            self.text_fields = []
+            self.number_fields = []
             # Initialize authors in session state if not present
             if "authors" not in st.session_state:
                 st.session_state.authors = [{"first_name": "", "last_name": "", "middle_name": ""}]
@@ -263,11 +277,17 @@ class PageGenerator:
                     self.author_placeholder.error(message)
                     return
                 
-                for (text, placeholder) in self.text_fields:
-                    valid, message = self.__validate_text_input(text)
-                    if not valid:
-                        placeholder.error(message)
-                        return
+                valid, message = self.__validate_text_input(self.title)
+                if not valid:
+                    self.title_placeholder.error(message)
+                    return
+
+                if not st.session_state.get('edit_message', None):
+                    for (text, placeholder) in self.text_fields:
+                        valid, message = self.__validate_text_input(text)
+                        if not valid:
+                            placeholder.error(message)
+                            return
 
                 if self.is_online:
                     if not self.url or len(self.url) < 1:
@@ -284,10 +304,7 @@ class PageGenerator:
                             self.db_name_placeholder.error("Введіть назву бази даних")
                             return
 
-                valid, message = self.__validate_text_input(self.title)
-                if not valid:
-                    self.title_placeholder.error(message)
-                    return
+                
 
                 entry = {
                     'id': self.entry.id if self.entry else None,
@@ -304,12 +321,12 @@ class PageGenerator:
                         self.publishing_number_placeholder.error("Номер видання має бути числом")
                         return
                     entry['type'] = "Book"
-                    entry['city'] = getattr(self, 'city', '')
-                    entry['pages_count'] = getattr(self, 'pages_count', 0)
-                    entry['year'] = getattr(self, 'year', 2023)
-                    entry['publisher'] = getattr(self, 'publisher', '')
-                    entry['publishing_number'] = getattr(self, 'publishing_number', '')
-                    entry['publishing_type'] = getattr(self, 'publishing_type', '')
+                    entry['city'] = getattr(self, 'city', None)
+                    entry['pages_count'] = getattr(self, 'pages_count', None)
+                    entry['year'] = getattr(self, 'year', None)
+                    entry['publisher'] = getattr(self, 'publisher', None)
+                    entry['publishing_number'] = getattr(self, 'publishing_number', None)
+                    entry['publishing_type'] = getattr(self, 'publishing_type', None)
                     
                 elif self.type == "Стаття":
                     valid, message = self.__check_pages_cited()
@@ -373,9 +390,19 @@ class PageGenerator:
         self.city = st.text_input("Місто видання", value=getattr(self.entry, 'city', '') if self.entry else "")
         self.city_placeholder = st.empty()
         self.text_fields.append((self.city, self.city_placeholder,))
-        self.pages_count = st.number_input("Кількість сторінок", min_value=1, max_value=5000, value=getattr(self.entry, 'pages_count', 1))
+        self.pages_count = st.number_input(
+            "Кількість сторінок",
+            min_value=1,
+            max_value=5000,
+            value=self.__get_numerical_value('pages_count', 1)
+        )
         self.pages_count_placeholder = st.empty()
-        self.year = st.number_input("Рік видання", min_value=1900, max_value=2100, value=getattr(self.entry, 'year', 2023))
+        self.year = st.number_input(
+            "Рік видання", 
+            min_value=1900, 
+            max_value=2100, 
+            value=self.__get_numerical_value('year', 2023)
+            )
         self.year_placeholder = st.empty()
         self.publisher = st.text_input("Видавництво", value=getattr(self.entry, 'publisher', ''))
         self.publisher_placeholder = st.empty()
@@ -393,14 +420,24 @@ class PageGenerator:
         self.journal_placeholder = st.empty()
         self.text_fields.append((self.journal, self.journal_placeholder,))
 
-        self.year = st.number_input("Рік публікації", min_value=1900, max_value=2100, value=getattr(self.entry, 'year', 2023))
+        self.year = st.number_input(
+            "Рік видання", 
+            min_value=1900, 
+            max_value=2100, 
+            value=self.__get_numerical_value('year', 2023)
+            )
         self.year_placeholder = st.empty()
 
         cols = st.columns(2)
         with cols[0]:
-            self.journal_issue = st.number_input("Номер випуску (0 якщо відсутній)", min_value=0, max_value=500, value=getattr(self.entry, 'issue', 1))
+            self.journal_issue = st.number_input(
+                "Номер випуску (0 якщо відсутній)",
+                min_value=0, 
+                max_value=500, 
+                value=self.__get_numerical_value('issue', 1)
+                )
         with cols[1]:
-            self.journal_number = st.number_input("Номер тому (0 якщо відсутній)", min_value=0, max_value=500, value=getattr(self.entry, 'number', 1))
+            self.journal_number = st.number_input("Номер тому (0 якщо відсутній)", min_value=0, max_value=500, value=self.__get_numerical_value('number', 1))
         self.issue_and_number_placeholder = st.empty()
         self.pages_cited = st.text_input("Сторінки, що цитуються (через '-')", value = getattr(self.entry, 'pages_cited', '') if self.entry else '')
         self.pages_cited_placeholder = st.empty()
@@ -428,8 +465,18 @@ class PageGenerator:
         self.university_placeholder = st.empty()
         self.city = st.text_input("Місто", getattr(self.entry, 'city', ''))
         self.city_placeholder = st.empty()
-        self.year = st.number_input("Рік захисту", min_value=1900, max_value=2100, value=getattr(self.entry, 'year', 2023))
-        self.pages_count = st.number_input("Кількість сторінок", min_value=1, max_value=5000, value=getattr(self.entry, 'pages_count', 1))
+        self.year = st.number_input(
+            "Рік захисту", 
+            min_value=1900, 
+            max_value=2100, 
+            value=self.__get_numerical_value('year', 2023)
+            )
+        self.pages_count = st.number_input(
+            "Кількість сторінок",
+            min_value=1,
+            max_value=5000,
+            value=self.__get_numerical_value('pages_count', 1)
+        )
 
     def generate_proceeding_page(self):
         self.conference = st.text_input("Назва збірника", value=getattr(self.entry, 'conference', ''))
@@ -455,7 +502,12 @@ class PageGenerator:
         self.city = st.text_input("Місто видавця", value=getattr(self.entry, 'city', ''))
         self.city_placeholder = st.empty()
         self.text_fields.append((self.city, self.city_placeholder,))
-        self.year = st.number_input("Рік видання", min_value=1900, max_value=2100, value=getattr(self.entry, 'year', 2023))
+        self.year = st.number_input(
+            "Рік видання", 
+            min_value=1900, 
+            max_value=2100, 
+            value=self.__get_numerical_value('year', 2023)
+            )
         self.year_placeholder = st.empty()
         self.pages_cited = st.text_input("Сторінки, що цитуються (через '-')", value = getattr(self.entry, 'pages_cited', '') if self.entry else '')
         self.pages_cited_placeholder = st.empty()

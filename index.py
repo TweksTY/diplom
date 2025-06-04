@@ -27,9 +27,9 @@ CONTAINER_HEIGHT = 100
 st.title("Біблографічні посилання")
 cols = st.columns(2)
 with cols[0]:
-    type = st.selectbox("Оберіть стандарт", ["ДСТУ 8302:2015", "ДСТУ ГОСТ 7.1:2006", "APA", "MLA"])
+    type = st.selectbox("Стиль цитування", ["ДСТУ 8302:2015", "ДСТУ ГОСТ 7.1:2006", "APA", "MLA"])
 with cols[1]:
-    sort_type = st.selectbox("Сортування", ["За датою", "За назвою"])
+    sort_type = st.selectbox("Сортування", ["За датою додавання", "За назвою"])
 
 entries = db.get_entries(conn, sort_by='time' if sort_type == "За датою" else 'title')
 cols = st.columns(4)

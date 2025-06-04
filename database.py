@@ -177,7 +177,7 @@ def update_entry(conn, entry):
                           publisher = ?
                       WHERE id = ? '''
         # Execute the update query
-        cur.execute(sql, (entry.get_data(), entry_id,))
+        cur.execute(sql, (entry.get_data()+ (entry_id,)))
         conn.commit()
     finally:
         cur.close()
