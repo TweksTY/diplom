@@ -15,7 +15,7 @@ def edit_author_dialog(author):
             middle_name = st.text_input("По батькові", value=author.middle_name or "")
             submit_button = st.form_submit_button(label="Зберегти")
             if submit_button:
-                result = db.update_author(conn, Author(first_name, last_name, middle_name, None, author.id))
+                result = db.update_author(conn, Author(first_name, last_name, middle_name, author.id))
                 if result is None:
                     st.session_state['success_message'] = f"Автор {author.id} успішно оновлений."
                     st.rerun()
