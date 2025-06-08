@@ -1,6 +1,6 @@
 import streamlit as st
 import requests
-from citation_types import Book, Dissertation, Article, Proceeding, Author
+from utils.citation_types import Book, Dissertation, Article, Proceeding, Author
 
 # Mapping of work types to their corresponding classes
 work_classes = {
@@ -95,7 +95,7 @@ def get_book_metadata(item):
         "pages_count": item.get("page", None).split("-") if "page" in item else None,
         "city": None,  
         "publishing_number": None,
-        "publishing_type": "monograph" if item.get("type") == "monograph" else None,
+        "publishing_type": "монографія" if item.get("type") == "monograph" else None,
     })
     return data
 
@@ -152,7 +152,7 @@ def switch_to_entry_page(entry):
 
 if st.session_state.get('switch_page', False):
     st.session_state['switch_page'] = False
-    st.switch_page("pages/test_page.py")
+    st.switch_page("pages/edit_page.py")
 
 if st.button(":arrow_left: Повернутися на попередню сторінку"):
     st.switch_page("index.py")
@@ -161,7 +161,7 @@ work_type = st.selectbox("Тип джерела", list(work_classes.keys()))
 
 with st.form("search_form"):
     title_input = st.text_input("Назва")
-    last_name = st.text_input("Прізвище автора")
+    last_name = st.text_input("Автор")
     submitted = st.form_submit_button("Пошук")
 
 status_placeholder = st.empty()
@@ -188,6 +188,6 @@ if submitted and (title_input or last_name):
         except Exception as e:
             status_placeholder.error(f"Не вдалося створити об'єкт: {e}")
     else:
-        status_placeholder.warning("Не вдалося знайти роботу за вказаною назвою.")
+        status_placeholder.warning("Не вдалося знайти роботу за вказаною назвою та автором.")
 elif submitted:
     status_placeholder.warning("Заповніть хоча б одне поле для пошуку.")

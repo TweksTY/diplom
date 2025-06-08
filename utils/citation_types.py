@@ -1,4 +1,4 @@
-from citation_bits import abbreviations_DSTU
+from utils.citation_bits import abbreviations_DSTU
 
     
 
@@ -79,7 +79,18 @@ class Entry:
         self.pages_count = data.get("pages_count", self.pages_count)
         
     def __repr__(self):
-        return f"Тип: {self.type}, Назва: {self.title}, Мова: {self.language}, URL: {self.url}, Автори: {[str(author) for author in self.authors]}"
+        types = {
+            "Book": "Книга",
+            "Dissertation": "Дисертація",
+            "Article": "Стаття",
+            "Proceeding": "Тези",
+            "Site": "Сайт",
+        }
+        result = f"Тип: {types[self.type]}, Назва: {self.title}, Мова: {'українська' if self.language == 'uk' else 'англійська або невизначена'}, URL: {self.url}"
+        if self.authors and not any(author.is_empty() for author in self.authors):
+            result += f", Автори: {', '.join([str(author) for author in self.authors])}"
+        result += f", Рік: {self.year}"
+        return result
     
     def _get_translated_text(self, text):
         translations = {}
@@ -136,10 +147,7 @@ class Entry:
         return (self.type, self.title, self.language, self.url, self.access_date, self.city, self.pages_count, self.year, self.authors,)
     
     def _get_authors_text(self, citation_style):
-        print(self.authors)
-        print(len(self.authors))
-        print(self.authors[0])
-        print(self.authors[0].is_empty())
+
         if len(self.authors) == 0 or self.authors[0].is_empty():
             return ""
         if citation_style == "DSTU_2015":
@@ -488,7 +496,6 @@ class Article(Entry):
         return result
     
     def get_DSTU2015_citation(self):
-        print(self)
         if (len(self.authors) < 4):
             name = super()._get_authors_text('DSTU_2015')
             result = f"{name} {self.title}. "

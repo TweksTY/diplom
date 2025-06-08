@@ -1,7 +1,7 @@
 import streamlit as st
 from streamlit import session_state as state
-from citation_types import Author
-import database as db
+from utils.citation_types import Author
+import utils.database as db
 
 
 

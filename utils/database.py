@@ -1,6 +1,6 @@
 import sqlite3
 from datetime import datetime
-from citation_types import Book, Article, Dissertation, Author, Proceeding, Site
+from utils.citation_types import Book, Article, Dissertation, Author, Proceeding, Site
 
 def dict_factory(cursor, row):
     """Convert rows to dictionaries."""
@@ -174,6 +174,9 @@ def update_entry(conn, entry):
                           language = ?,
                           url = ?,
                           access_date = ?,
+                          city = ?,
+                          pages_count = ?,
+                          year = ?,
                           publisher = ?
                       WHERE id = ? '''
         # Execute the update query

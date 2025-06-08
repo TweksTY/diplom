@@ -1,8 +1,8 @@
 import streamlit as st
 from streamlit import session_state as state
-import database as db
-from citation_types import Book, Article, Dissertation, Author, Proceeding, Site
-from citation_bits import specialties
+import utils.database as db
+from utils.citation_types import Book, Article, Dissertation, Author, Proceeding, Site
+from utils.citation_bits import specialties
 import datetime
 
 
@@ -122,22 +122,12 @@ class PageGenerator:
         }
         entry_obj = constructors[entry['type']](entry)
 
-        #if (entry['type'] == "Book"):
-        #    entry_obj = Book(entry)
-        #elif (entry['type'] == "Article"):
-        #    entry_obj = Article(entry)
-        #elif (entry['type'] == "Dissertation"):
-        #    entry_obj = Dissertation(entry)
-        #elif (entry['type'] == "Proceeding"):
-        #    entry_obj = Proceeding(entry)
-        #elif (entry['type'] == "Site"):
-        #    entry_obj = Site(entry)
-
-
         if (not entry_obj.id):
+            st.session_state['index_message'] = "Джерело успішно додано."
             db.insert_entry(state['conn'], entry_obj)
             return
         else:
+            st.session_state['index_message'] = "Джерело успішно оновлено."
             db.update_entry(state['conn'], entry_obj)
             return
 
