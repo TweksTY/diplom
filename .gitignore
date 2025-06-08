@@ -9,7 +9,6 @@ package.json
 OpenSans.ttf
 main.py
 index.spec
-edit_page.py
 citations2.db
 citations1.db
 .streamlit/config.toml
