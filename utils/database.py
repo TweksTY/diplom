@@ -28,7 +28,7 @@ def create_connection(db_file):
     conn = None
     try:
         conn = sqlite3.connect(db_file, check_same_thread=False) 
-        conn.row_factory = dict_factory  # Enable dictionary-like access to rows
+        conn.row_factory = dict_factory
         return conn
     except sqlite3.Error as e:
         print(e)
@@ -226,7 +226,7 @@ def get_author_by_citation(conn, citation_id):
         rows = cur.fetchall()
         authors = []
         if (not rows):
-            authors.append(Author("", "", None))  # Add empty author if no authors found
+            authors.append(Author("", "", None))
         else:
             for row in rows:
                 authors.append(Author(row['first_name'], row['last_name'], row.get('middle_name', None)))
@@ -288,13 +288,12 @@ def get_authors(conn):
 def delete_author(conn, author_id):
     cur = conn.cursor()
     try:
-        # Check if the author is referenced in author_list
         cur.execute('SELECT COUNT(*) as cnt FROM author_list WHERE author_id=?', (author_id,))
         if cur.fetchone()['cnt'] > 0:
             return "Неможливо видалити автора, оскільки він використовується в записах цитувань."
         sql_author_list = 'DELETE FROM author_list WHERE author_id=?'
         cur.execute(sql_author_list, (author_id,))
-        # Delete the author
+
         sql_authors = 'DELETE FROM authors WHERE id=?'
         cur.execute(sql_authors, (author_id,))
         conn.commit()
@@ -305,10 +304,8 @@ def delete_author(conn, author_id):
 def delete_entry(conn, entry_id):
     cur = conn.cursor()
     try:
-        # Delete all rows in author_list where citation_id = entry_id
         sql_author_list = 'DELETE FROM author_list WHERE citation_id=?'
         cur.execute(sql_author_list, (entry_id,))
-        # Mark the citation as inactive
         sql_citations = 'UPDATE citations SET active = 0 WHERE id=?'
         cur.execute(sql_citations, (entry_id,))
         conn.commit()
@@ -316,6 +313,7 @@ def delete_entry(conn, entry_id):
         cur.close()
 
 def get_entries(conn, entry_type = None, sort_by = "time"):
+    print(sort_by)
     sql_sort_dict = {
         'time_temp' : '',
         'time' : ' ORDER BY julianday(incl_date) ASC', # Сортування за датою включення

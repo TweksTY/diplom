@@ -54,9 +54,6 @@ class Entry:
     language = "uk"
     authors = []
     url = None
-    #author_first_name = ""
-    #author_last_name = ""
-    #author_middle_name = ""
     title = None
     city = None
     year = None
@@ -70,9 +67,6 @@ class Entry:
         self.language = data.get("language", self.language)
         self.url = data.get("url", self.url)
         self.access_date = data.get("access_date", self.access_date)
-        #self.author_first_name = data.get("author_first_name", self.author_first_name)
-        #self.author_last_name = data.get("author_last_name", self.author_last_name)
-        #self.author_middle_name = data.get("author_middle_name", self.author_middle_name)
         self.title = data.get("title", self.title)
         self.city = data.get("city", self.city)
         self.year = data.get("year", self.year)
@@ -151,7 +145,7 @@ class Entry:
         if len(self.authors) == 0 or self.authors[0].is_empty():
             return ""
         if citation_style == "DSTU_2015":
-            return ', '.join([f"{author.last_name} {author.first_name[0]}. {author.middle_name[0] + '.' if author.middle_name else ''}" for author in self.authors])
+            return ', '.join([f"{author.last_name} {author.first_name[0]}.{' ' + author.middle_name[0] + '.' if author.middle_name else ''}" for author in self.authors])
         if citation_style == "DSTU_2006":
             first = self.authors[0]
             name = ""
@@ -298,14 +292,14 @@ class Book(Entry):
             result = f"{self.title}"
         
         if (self.publishing_type):
-            result += f" : {self.publishing_type} "
+            result += f" : {self.publishing_type}"
         if (self.url):
-            result += f"[{super()._get_translated_text('resource')}]"
+            result += f" [{super()._get_translated_text('resource')}]"
         result += " / "
         if (len(self.authors) < 4):
-            result += f"{name}"
+            result += f" {name}"
         else:
-            result += f"{first.get_first_name()} {first.get_middle_name()}{first.last_name} [{super()._get_authors_text('mla-multiple-authors')}]"
+            result += f" {first.get_first_name()} {first.get_middle_name()}{first.last_name} [{super()._get_authors_text('mla-multiple-authors')}]"
         result += f". — {self._get_publishing_text('DSTU_2006')}{self.city} : {self.publisher}, {self.year}. — {self.pages_count} {super()._get_translated_text('pages')}"
         result += super()._get_url_text('DSTU_2006')
         return result
@@ -392,7 +386,6 @@ class Dissertation(Entry):
 
 
         return result
-        #return f"{self.authors[0].last_name} {self.authors[0].first_name[0]}. {self.authors[0].middle_name[0]}. {self.title} : ди{super()._get_translated_text('pages')} ... {self.get_degree_text()} : {self.specialty_code}. {self.city}, {self.year}. {self.pages_count} {super()._get_translated_text('pages')}"
     
     def get_APA_citation(self):
         name = super()._get_authors_text('APA')
@@ -413,8 +406,7 @@ class Dissertation(Entry):
         result += super()._get_url_text('APA')
         
         return result
-        #return f"{self.authors[0].last_name}, {self.authors[0].first_name[0]}. {self.authors[0].middle_name[0]}. ({self.year}). {self.title} : [Неопубл. ди{super()._get_translated_text('pages')} {self.get_degree_text()}]. {self.university}."
-    
+        
     def get_MLA_citation(self):
         name = super()._get_authors_text('MLA')
         degree_text = self._get_degree_text()

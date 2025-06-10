@@ -44,7 +44,7 @@ with cols[0]:
 with cols[1]:
     sort_type = st.selectbox("Сортування", ["За датою додавання", "За алфавітним порядком"])
 
-entries = db.get_entries(conn, sort_by='time' if sort_type == "За датою" else 'title')
+entries = db.get_entries(conn, sort_by='time' if sort_type == "За датою додавання" else 'title')
 cols = st.columns(4)
 citations = []
 for entry in entries:
@@ -88,16 +88,6 @@ with cols[3]:
 col1, col2, col3 = st.columns([12, 0.5, 0.5])
 for entry in citations:
     with col1:
-        #citation = ""
-        #if type == "ДСТУ 8302:2015":
-        #    citation = entry.get_DSTU2015_citation()
-        #elif type == "ДСТУ ГОСТ 7.1:2006":
-        #    citation = entry.get_DSTU2006_citation()
-        #elif type == "APA":
-        #    citation = entry.get_APA_citation()
-        #elif type == "MLA":
-        #    citation = entry.get_MLA_citation()
-        #citations.append(citation)
         with st.container(height=CONTAINER_HEIGHT, border=True):
             st.write(entry[1])
     with col2:
@@ -109,8 +99,6 @@ for entry in citations:
     with col3:
         with st.container(height=CONTAINER_HEIGHT, border=False):
             st.button(label=":x:", key=f"delete_{entry[0].id}", on_click=delete_entry, args=(entry[0].id,), use_container_width=True)
-                #st.session_state['index_message'] = f"Джерело успішно видалено."
-                #st.rerun()
 
 
 

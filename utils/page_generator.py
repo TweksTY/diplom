@@ -5,9 +5,6 @@ from utils.citation_types import Book, Article, Dissertation, Author, Proceeding
 from utils.citation_bits import specialties
 import datetime
 
-
-    
-
 class PageGenerator:
 
     def __validate_text_input(self, input_data):
@@ -104,8 +101,8 @@ class PageGenerator:
             valid, message = self.__validate_author(author)
             if not valid:
                 return False, message
-            # Create a tuple to uniquely identify an author
-            author_id = (author.first_name.strip().lower(), author.last_name.strip().lower(), author.middle_name.strip().lower())
+
+            author_id = (author.first_name.strip().lower(), author.last_name.strip().lower(), author.middle_name.strip().lower() if author.middle_name else "")
             if author_id in seen:
                 return False, "Список авторів містить дублікати"
             seen.add(author_id)
@@ -164,11 +161,9 @@ class PageGenerator:
 
     def generate_page(self):
 
-        # Function to add a new author
         def add_author():
             st.session_state.authors.append({"first_name": "", "last_name": "", "middle_name": ""})
 
-        # Function to remove an author
         def remove_author(idx):
             if len(st.session_state.authors) > 1:
                 st.session_state.authors.pop(idx)
@@ -213,11 +208,10 @@ class PageGenerator:
             self.title_placeholder = st.empty()
             self.text_fields = []
             self.number_fields = []
-            # Initialize authors in session state if not present
+
             if "authors" not in st.session_state:
                 st.session_state.authors = [{"first_name": "", "last_name": "", "middle_name": ""}]
 
-            # Render author input fields
             for idx, author in enumerate(st.session_state.authors):
                 cols = st.columns([3, 3, 3, 1])
                 with cols[0]:
